@@ -1,7 +1,18 @@
 {
   "expo": {
-    "name": "KidsPaint",
-    "slug": "KidsPaint",
-    "version": "1.0.0"
+    "name": "Pintalú",
+    "slug": "pintalu",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "ios": {
+      "infoPlist": {
+        "NSPhotoLibraryAddUsageDescription": "Pintalú saves your drawings to your photo library."
+      }
+    },
+    "android": {
+      "permissions": ["READ_MEDIA_IMAGES", "WRITE_EXTERNAL_STORAGE"]
+    }
   }
 }
+

@@ -1,8 +1,6 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import {
   View,
-  TouchableOpacity,
-  Text,
   StyleSheet,
   useWindowDimensions,
 } from 'react-native';
@@ -27,6 +25,10 @@ import { useLanguage } from '../../i18n';
 
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../navigation';
+
+const CYCLE_TOOLS: ToolType[] = [
+  'paintbrush', 'pencil', 'crayon', 'marker', 'fillBucket', 'sprayCan', 'eraser',
+];
 
 type RouteParams = {
   projectId?: string;
@@ -209,8 +211,6 @@ export default function CanvasScreen() {
   );
 
   // ─── Cycle tool / color for floating pill ───────────────────────────────
-  const CYCLE_TOOLS: ToolType[] = ['paintbrush', 'pencil', 'crayon', 'marker', 'fillBucket', 'sprayCan', 'eraser'];
-
   const handleCycleTool = useCallback(() => {
     const idx = CYCLE_TOOLS.indexOf(drawing.activeTool as typeof CYCLE_TOOLS[number]);
     const next = CYCLE_TOOLS[(idx + 1) % CYCLE_TOOLS.length];
@@ -314,27 +314,5 @@ const styles = StyleSheet.create({
   canvasArea: {
     flex: 1,
     position: 'relative',
-  },
-  showToolbarPill: {
-    position: 'absolute',
-    bottom: 16,
-    alignSelf: 'center',
-    left: '35%',
-    right: '35%',
-    backgroundColor: colors.surface,
-    borderRadius: 999,
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.12,
-    shadowRadius: 6,
-    elevation: 4,
-  },
-  showToolbarText: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: colors.textSecondary,
   },
 });

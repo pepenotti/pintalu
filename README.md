@@ -16,39 +16,6 @@ A React Native drawing app for kids, built with Expo (bare workflow), Skia, and 
 | Android min SDK | API 24 (Android 7) |
 | CocoaPods | 1.14+ |
 
-## Project Structure
-
-```
-pintalu/
-├── src/
-│   ├── components/
-│   │   ├── Canvas/          # CanvasView — Skia rendering + gesture handling
-│   │   ├── ColorPicker/     # 16-color swatch row
-│   │   ├── NewCanvasSheet/  # New project modal (size presets + fill mode)
-│   │   └── Toolbar/         # TopBar + BottomToolbar + BrushSizeSlider
-│   ├── hooks/
-│   │   ├── useAutoSave.ts   # Saves PNG on app background
-│   │   ├── useCanvasGestures.ts  # Draw (1-finger) + zoom/pan (2-finger)
-│   │   ├── useDrawing.ts    # Active tool + brush settings
-│   │   └── useHistory.ts    # Undo/redo with MMKV persistence
-│   ├── navigation/          # RootStackParamList types
-│   ├── screens/
-│   │   ├── CanvasScreen/    # Main drawing screen
-│   │   └── GalleryScreen/   # Project grid + thumbnails
-│   ├── store/
-│   │   ├── projectsStore.ts # MMKV + expo-file-system persistence
-│   │   └── types.ts         # All TypeScript types
-│   ├── theme/
-│   │   └── darkTheme.ts     # Colors, drawing palette, brush sizes
-│   └── utils/
-│       ├── brushPaints.ts   # Skia paint factory per tool
-│       └── floodFill.ts     # Stack-based flood fill algorithm
-├── App.tsx                  # Navigation root
-├── app.json                 # Expo config
-├── babel.config.js
-└── tsconfig.json
-```
-
 ## Setup
 
 ### 1. Install JS dependencies

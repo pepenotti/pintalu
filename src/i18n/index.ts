@@ -59,6 +59,16 @@ export const translations = {
     brushSizeLabel: (key: string) => `Brush size ${key}`,
     // Language toggle label (shows current language)
     languageToggle: '🌐 EN',
+    // About
+    aboutBtn: 'About',
+    aboutTitle: 'About Pintalú',
+    aboutTagline: 'Draw, color, create! 🎨',
+    aboutDescription: 'A personal project I made for my kid, and decided to share with everyone. Free to use, forever.',
+    aboutFeedback: 'Feedback is always welcome!',
+    aboutGithub: 'GitHub repo',
+    aboutEmail: 'Send an email',
+    aboutVersion: 'Version',
+    aboutClose: 'Close',
   },
   es: {
     // TopBar
@@ -105,10 +115,20 @@ export const translations = {
     brushSizeLabel: (key: string) => `Tamaño ${key}`,
     // Language toggle label (shows current language)
     languageToggle: '🌐 ES',
+    // About
+    aboutBtn: 'Acerca de',
+    aboutTitle: 'Acerca de Pintalú',
+    aboutTagline: '¡Dibuja, colorea, crea! 🎨',
+    aboutDescription: 'Un proyecto personal que hice para mi hijo — y decidí compartir con todos. Gratis para siempre.',
+    aboutFeedback: '¡El feedback siempre es bienvenido!',
+    aboutGithub: 'Repositorio en GitHub',
+    aboutEmail: 'Enviar un email',
+    aboutVersion: 'Versión',
+    aboutClose: 'Cerrar',
   },
 } as const;
 
-export type Translations = typeof translations['en'];
+export type Translations = typeof translations[Language];
 
 // ─── Context ──────────────────────────────────────────────────────────────────
 interface LanguageContextType {
@@ -139,7 +159,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   const toggleLanguage = useCallback(() => {
     setLang(prev => {
       const next: Language = prev === 'en' ? 'es' : 'en';
-      langFile.write(JSON.stringify(next)).catch(() => {});
+      langFile.write(JSON.stringify(next));
       return next;
     });
   }, []);

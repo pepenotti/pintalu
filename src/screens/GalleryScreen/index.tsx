@@ -1,17 +1,11 @@
-import React, { useState, useCallback, useEffect, useRef } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import {
   View,
   Text,
   FlatList,
   TouchableOpacity,
-  Image,
   StyleSheet,
   Alert,
-  Modal,
-  TextInput,
-  KeyboardAvoidingView,
-  Pressable,
-  Platform,
   ListRenderItemInfo,
   useWindowDimensions,
 } from 'react-native';
@@ -20,8 +14,8 @@ import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { Asset, requestPermissionsAsync } from 'expo-media-library';
 import { Ionicons } from '@expo/vector-icons';
 
-import { colors, spacing, radius } from '../../theme/darkTheme';
-import { Project, FillMode } from '../../store/types';
+import { colors, spacing } from '../../theme/darkTheme';
+import { Project } from '../../store/types';
 import {
   getAllProjects,
   deleteProject,
@@ -34,7 +28,9 @@ import { useLanguage } from '../../i18n';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../navigation';
 
-const HIT_SLOP = { top: 8, bottom: 8, left: 8, right: 8 } as const;
+import { ProjectCard } from './ProjectCard';
+import { AboutModal } from './AboutModal';
+import { RenameModal } from './RenameModal';
 
 export default function GalleryScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
@@ -42,6 +38,7 @@ export default function GalleryScreen() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [renameTarget, setRenameTarget] = useState<Project | null>(null);
   const [renameText, setRenameText] = useState('');
+  const [aboutVisible, setAboutVisible] = useState(false);
   const { t, toggleLanguage } = useLanguage();
   const tRef = useRef(t);
   tRef.current = t;
@@ -176,124 +173,26 @@ export default function GalleryScreen() {
         <Ionicons name="add" size={34} color="#FFF" />
       </TouchableOpacity>
 
-      {/* ─── Rename modal ────────────────────────────────────────────────── */}
-      <Modal
-        visible={renameTarget !== null}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setRenameTarget(null)}
+      {/* About button — bottom left */}
+      <TouchableOpacity
+        style={styles.aboutBtn}
+        onPress={() => setAboutVisible(true)}
+        accessibilityLabel={t.aboutBtn}
+        accessibilityRole="button"
+        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
       >
-        <KeyboardAvoidingView
-          style={styles.modalBackdrop}
-          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        >
-          <Pressable style={StyleSheet.absoluteFill} onPress={() => setRenameTarget(null)} />
-          <View style={styles.renameCard}>
-            <Text style={styles.renameTitle}>{t.renameDrawingTitle}</Text>
-            <TextInput
-              style={styles.renameInput}
-              value={renameText}
-              onChangeText={setRenameText}
-              autoFocus
-              selectTextOnFocus
-              returnKeyType="done"
-              onSubmitEditing={submitRename}
-              placeholderTextColor={colors.textSecondary}
-            />
-            <View style={styles.renameActions}>
-              <TouchableOpacity
-                style={styles.renameBtn}
-                onPress={() => setRenameTarget(null)}
-              >
-                <Text style={styles.renameBtnCancel}>{t.cancel}</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.renameBtn, styles.renameBtnPrimary]}
-                onPress={submitRename}
-              >
-                <Text style={styles.renameBtnPrimaryText}>{t.save}</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </KeyboardAvoidingView>
-      </Modal>
+        <Ionicons name="information-circle-outline" size={22} color={colors.textSecondary} />
+      </TouchableOpacity>
+
+      <AboutModal visible={aboutVisible} onClose={() => setAboutVisible(false)} />
+      <RenameModal
+        visible={renameTarget !== null}
+        value={renameText}
+        onChange={setRenameText}
+        onSubmit={submitRename}
+        onCancel={() => setRenameTarget(null)}
+      />
     </SafeAreaView>
-  );
-}
-
-// ─── Project card ──────────────────────────────────────────────────────────────
-
-function ProjectCard({
-  project,
-  onPress,
-  onRename,
-  onExport,
-  onDelete,
-}: {
-  project: Project;
-  onPress: () => void;
-  onRename: () => void;
-  onExport: () => void;
-  onDelete: () => void;
-}) {
-  const [hasThumb, setHasThumb] = useState(false);
-  const uri = getPNGUri(project.id);
-
-  useEffect(() => {
-    pngExists(project.id).then(setHasThumb);
-  }, [project.id]);
-
-  const date = new Date(project.updatedAt).toLocaleDateString(undefined, {
-    month: 'short',
-    day: 'numeric',
-  });
-
-  return (
-    <TouchableOpacity
-      style={styles.card}
-      onPress={onPress}
-      activeOpacity={0.85}
-    >
-      <View style={styles.thumb}>
-        {hasThumb ? (
-          <Image source={{ uri }} style={styles.thumbImg} resizeMode="cover" />
-        ) : (
-          <Text style={styles.thumbPlaceholder}>🎨</Text>
-        )}
-
-        {/* Quick-action overlay */}
-        <View style={styles.thumbOverlay} pointerEvents="box-none">
-          <TouchableOpacity
-            style={styles.thumbBtn}
-            onPress={onRename}
-            hitSlop={HIT_SLOP}
-          >
-            <Ionicons name="pencil-outline" size={15} color="#fff" />
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.thumbBtn}
-            onPress={onExport}
-            hitSlop={HIT_SLOP}
-          >
-            <Ionicons name="share-outline" size={15} color="#fff" />
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.thumbBtn, styles.thumbBtnDanger]}
-            onPress={onDelete}
-            hitSlop={HIT_SLOP}
-          >
-            <Ionicons name="trash-outline" size={15} color="#fff" />
-          </TouchableOpacity>
-        </View>
-      </View>
-
-      <View style={styles.cardMeta}>
-        <Text style={styles.cardName} numberOfLines={1}>
-          {project.name}
-        </Text>
-        <Text style={styles.cardDate}>{date}</Text>
-      </View>
-    </TouchableOpacity>
   );
 }
 
@@ -333,39 +232,6 @@ const styles = StyleSheet.create({
   row: {
     gap: spacing.md,
   },
-  card: {
-    flex: 1,
-    backgroundColor: colors.surfaceRaised,
-    borderRadius: radius.lg,
-    overflow: 'hidden',
-    marginBottom: spacing.md,
-  },
-  thumb: {
-    aspectRatio: 4 / 3,
-    backgroundColor: colors.surface,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  thumbImg: {
-    width: '100%',
-    height: '100%',
-  },
-  thumbPlaceholder: {
-    fontSize: 40,
-  },
-  cardMeta: {
-    padding: spacing.sm,
-  },
-  cardName: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: colors.textPrimary,
-    marginBottom: 2,
-  },
-  cardDate: {
-    fontSize: 12,
-    color: colors.textSecondary,
-  },
   empty: {
     flex: 1,
     alignItems: 'center',
@@ -382,81 +248,6 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: colors.textSecondary,
   },
-  thumbOverlay: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    gap: 5,
-    paddingHorizontal: 7,
-    paddingVertical: 6,
-    backgroundColor: 'rgba(0,0,0,0.38)',
-  },
-  thumbBtn: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    backgroundColor: 'rgba(255,255,255,0.18)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  thumbBtnDanger: {
-    backgroundColor: 'rgba(210,45,45,0.65)',
-  },
-  // Rename modal
-  modalBackdrop: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.55)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: spacing.xl,
-  },
-  renameCard: {
-    width: '100%',
-    backgroundColor: colors.surfaceRaised,
-    borderRadius: radius.lg,
-    padding: spacing.lg,
-    gap: spacing.md,
-  },
-  renameTitle: {
-    fontSize: 17,
-    fontWeight: '700',
-    color: colors.textPrimary,
-  },
-  renameInput: {
-    backgroundColor: colors.surface,
-    borderRadius: radius.md,
-    paddingHorizontal: spacing.md,
-    paddingVertical: 10,
-    fontSize: 15,
-    color: colors.textPrimary,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.border,
-  },
-  renameActions: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    gap: spacing.sm,
-  },
-  renameBtn: {
-    paddingHorizontal: spacing.md,
-    paddingVertical: 8,
-    borderRadius: radius.md,
-  },
-  renameBtnCancel: {
-    fontSize: 15,
-    color: colors.textSecondary,
-  },
-  renameBtnPrimary: {
-    backgroundColor: colors.accent,
-  },
-  renameBtnPrimaryText: {
-    fontSize: 15,
-    fontWeight: '700',
-    color: '#fff',
-  },
   fab: {
     position: 'absolute',
     bottom: 32,
@@ -472,5 +263,10 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.3,
     shadowRadius: 6,
+  },
+  aboutBtn: {
+    position: 'absolute',
+    bottom: 36,
+    left: 24,
   },
 });
